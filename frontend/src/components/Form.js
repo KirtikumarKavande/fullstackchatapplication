@@ -1,16 +1,31 @@
 import React, { useState } from "react";
 import useForm from "../hooks/useForm";
+import { SIGNIN_BACKGROUND_IMAGE } from "../utilites/constant";
+import FetchData from "../utilites/functions/FetchData";
 
 const Form = () => {
   const { form, onchangeFunction } = useForm();
   const [isSignupForm, setIsSignupForm] = useState(true);
-  console.log(form);
+
+
+
+  const formSubmit = async(e) => {
+    e.preventDefault()
+    if(isSignupForm){
+      const data= await FetchData("http://localhost:4000/signup",form,"POST")
+    console.log(data)
+
+
+    }
+    e.preventDefault();
+  };
+
   return (
     <div className="flex items-center justify-center">
       <div>
         <img
           className="h-screen w-screen"
-          src="https://images.unsplash.com/photo-1528460033278-a6ba57020470?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
+          src={SIGNIN_BACKGROUND_IMAGE}
           alt="bg"
         />
       </div>
@@ -23,21 +38,23 @@ const Form = () => {
                   Create an account
                 </h1>
                 <form className="space-y-4 md:space-y-6">
-               { isSignupForm &&  <div>
-                    <label
-                      for="email"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Kirtikumar"
-                      onChange={onchangeFunction}
-                    />
-                  </div>}
+                  {isSignupForm && (
+                    <div>
+                      <label
+                        for="email"
+                        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      >
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        placeholder="Kirtikumar"
+                        onChange={onchangeFunction}
+                      />
+                    </div>
+                  )}
                   <div>
                     <label
                       for="email"
@@ -69,16 +86,25 @@ const Form = () => {
                     />
                   </div>
 
-                  <button className="w-full text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-24 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                    {isSignupForm?"  Create an account":"SIGNIN"}
+                  <button
+                    onClick={formSubmit}
+                    className="w-full text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-24 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                  >
+                    {isSignupForm
+                      ? "  Create an account"
+                      : "Sign in to account"}
                   </button>
-                  
                 </form>
                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                    Already have an account?{" "}
-                    
-                   <button onClick={()=>{setIsSignupForm(!isSignupForm)}}>{!isSignupForm?"signup":"signin"}</button>
-                  </p>
+                  Already have an account?{" "}
+                  <button
+                    onClick={() => {
+                      setIsSignupForm(!isSignupForm);
+                    }}
+                  >
+                    {!isSignupForm ? "signup" : "signin"}
+                  </button>
+                </p>
               </div>
             </div>
           </section>
