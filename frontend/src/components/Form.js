@@ -3,8 +3,12 @@ import useForm from "../hooks/useForm";
 import { SIGNIN_BACKGROUND_IMAGE, BASE_URL } from "../utilites/constant";
 import FetchData from "../utilites/functions/FetchData";
 import { toast } from "react-toastify";
+import {useNavigate} from 'react-router-dom'
+import ChatHome from "./ChatHome";
 
-const Form = () => {
+const Form = () => {  
+  const navigate=useNavigate()
+
   const { form, onchangeFunction } = useForm();
   const [isSignupForm, setIsSignupForm] = useState(true);
 
@@ -18,6 +22,7 @@ const Form = () => {
     );
     if (data.statusCode === 200) {
       toast.success(`${isSignupForm ? "signup" : "signin"} successful`);
+      navigate('/chat')
     } else {
       toast.error(data.message);
     }
