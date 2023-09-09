@@ -1,23 +1,26 @@
 import React, { useState } from "react";
 import useForm from "../hooks/useForm";
-import { SIGNIN_BACKGROUND_IMAGE } from "../utilites/constant";
+import { SIGNIN_BACKGROUND_IMAGE, BASE_URL } from "../utilites/constant";
 import FetchData from "../utilites/functions/FetchData";
+import { toast } from "react-toastify";
 
 const Form = () => {
   const { form, onchangeFunction } = useForm();
   const [isSignupForm, setIsSignupForm] = useState(true);
 
-
-
-  const formSubmit = async(e) => {
-    e.preventDefault()
-    if(isSignupForm){
-      const data= await FetchData("http://localhost:4000/signup",form,"POST")
-    console.log(data)
-
-
-    }
+  const formSubmit = async (e) => {
     e.preventDefault();
+
+    const data = await FetchData(
+      `${BASE_URL}/${isSignupForm ? "signup" : "signin"} `,
+      form,
+      "POST"
+    );
+    if (data.statusCode === 200) {
+      toast.success(`${isSignupForm ? "signup" : "signin"} successful`);
+    } else {
+      toast.error(data.message);
+    }
   };
 
   return (

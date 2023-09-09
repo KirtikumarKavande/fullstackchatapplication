@@ -13,12 +13,10 @@ const signUpUser = async (req, res, next) => {
 
   try {
     if (!name || !email || !password) {
-      return res
-        .status(400)
-        .json({
-          message: "Please provide all required fields",
-          statusCode: 400,
-        });
+      return res.status(400).json({
+        message: "Please provide all required fields",
+        statusCode: 400,
+      });
     }
 
     const existingUser = await signupUserModel.findOne({
@@ -40,13 +38,11 @@ const signUpUser = async (req, res, next) => {
       }
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        message: "Something went wrong",
-        error: err.message,
-        statusCode: 500,
-      });
+    res.status(500).json({
+      message: "Something went wrong",
+      error: err.message,
+      statusCode: 500,
+    });
   }
 };
 
@@ -68,20 +64,23 @@ const signInUser = async (req, res, next) => {
             success: true,
             message: "sign in success",
             token: generateAccessToken(data[0].id, data[0].name),
+            statusCode: 200,
           });
         } else {
-          res
-            .status(400)
-            .json({ success: false, message: "password is invalid" });
+          res.status(400).json({
+            success: false,
+            message: "password is invalid",
+            statusCode: 400,
+          });
         }
       });
     } else {
       return res
         .status(400)
-        .json({ success: false, message: "user not found" });
+        .json({ success: false, message: "user not found", statusCode: 400 });
     }
   } catch (err) {
-    res.status(500).json({ success: false, message: err });
+    res.status(500).json({ success: false, message: err, statusCode: 500 });
   }
 };
 
