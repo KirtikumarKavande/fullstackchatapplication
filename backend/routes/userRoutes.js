@@ -1,6 +1,7 @@
 const signupUserModel = require("../models/user");
 
 const user = require("../controllers/userController");
+
 const express = require("express");
 
 const router = express.Router();

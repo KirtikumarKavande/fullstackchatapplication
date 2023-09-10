@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
 const userRoutes = require("./routes/userRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const user = require("./models/user");
+const message = require("./models/messsages");
 
 const app = express();
 
@@ -12,6 +15,10 @@ app.use(cors({ origin: "http://localhost:3000" }));
 app.use(bodyParser.json({ extended: false }));
 
 app.use(userRoutes);
+app.use(messageRoutes);
+
+user.hasMany(message);
+message.belongsTo(user);
 
 sequelize
   .sync()
