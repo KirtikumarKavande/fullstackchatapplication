@@ -10,7 +10,7 @@ const ChatHome = () => {
   const messageRef = useRef();
   const navigate = useNavigate();
   const [messageData, setMessageData] = useState([]);
-  const[knowName,setKnowName]=useState(null)
+  const [knowName, setKnowName] = useState(null);
 
   const handleChat = (e) => {
     e.preventDefault();
@@ -26,7 +26,10 @@ const ChatHome = () => {
     localStorage.clear();
   };
   useEffect(() => {
-    fetchMessage();
+    const id = setInterval(() => {
+      fetchMessage();
+    }, 1000);
+    return () => clearInterval(id);
   }, []);
   const fetchMessage = async () => {
     const res = await fetch(`${BASE_URL}/showmessage`, {
@@ -71,7 +74,9 @@ const ChatHome = () => {
             </div>
           </div>
           <div className="p-4 h-3/4 overflow-y-scroll ">
-          <div className=" w-fit h-fit text-gray-700  border border-white shadow-lg absolute left-[600px]">{knowName}</div>
+            <div className=" w-fit h-fit text-gray-700  border border-white shadow-lg absolute left-[600px]">
+              {knowName}
+            </div>
             {messageData.map((item) => (
               <div>
                 {item.email !== localStorage.getItem("email") && (
@@ -82,8 +87,6 @@ const ChatHome = () => {
                       }}
                       onMouseOut={() => {
                         setKnowName(null);
-                        
-
                       }}
                       className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2"
                     >
