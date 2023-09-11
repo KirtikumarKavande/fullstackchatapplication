@@ -8,6 +8,7 @@ const express = require("express");
 const router = express.Router();
 
 router.post("/savemessage", auth.authenticate, message.saveMessage);
-router.post("/showmessage", auth.authenticate, message.showMessage);
+router.get("/showmessage", auth.authenticate, message.showMessage);
+
 
 module.exports = router;

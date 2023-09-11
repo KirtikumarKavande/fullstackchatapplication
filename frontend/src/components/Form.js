@@ -30,6 +30,7 @@ const Form = () => {
       if (!isSignupForm) {
         navigate("/chat");
       }
+      localStorage.setItem('email',form.email)
     } else {
       toast.error(data.message);
     }

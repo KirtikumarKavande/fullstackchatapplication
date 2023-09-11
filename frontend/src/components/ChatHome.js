@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 
 import FetchData from "../utilites/functions/FetchData";
@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 const ChatHome = () => {
   const messageRef = useRef();
   const navigate = useNavigate();
+  const [messageData, setMessageData] = useState([]);
+  const[knowName,setKnowName]=useState(null)
 
   const handleChat = (e) => {
     e.preventDefault();
@@ -20,8 +22,23 @@ const ChatHome = () => {
     messageRef.current.value = "";
   };
   const logout = () => {
-    localStorage.removeItem("token");
     navigate("/");
+    localStorage.clear();
+  };
+  useEffect(() => {
+    fetchMessage();
+  }, []);
+  const fetchMessage = async () => {
+    const res = await fetch(`${BASE_URL}/showmessage`, {
+      headers: {
+        "content-type": "application/json",
+        Authorization: localStorage.getItem("token"),
+      },
+    });
+
+    const data = await res.json();
+    if (!data) return;
+    setMessageData(data);
   };
 
   return (
@@ -40,7 +57,7 @@ const ChatHome = () => {
           </div>
           <button className="text-black " onClick={logout}>
             {" "}
-            <BiLogOut size={25} className="inline"  /> Logout
+            <BiLogOut size={25} className="inline" /> Logout
           </button>
         </div>
         <div className="w-3/4 bg-[#EFEAE2] ">
@@ -53,22 +70,44 @@ const ChatHome = () => {
               </div>
             </div>
           </div>
-          <div className="p-4 h-3/4">
-            <div className="flex mb-4">
-              <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2">
-                JD
+          <div className="p-4 h-3/4 overflow-y-scroll ">
+          <div className=" w-fit h-fit text-gray-700  border border-white shadow-lg absolute left-[600px]">{knowName}</div>
+            {messageData.map((item) => (
+              <div>
+                {item.email !== localStorage.getItem("email") && (
+                  <div className="flex mb-4">
+                    <div
+                      onMouseMove={() => {
+                        setKnowName(item.name);
+                      }}
+                      onMouseOut={() => {
+                        setKnowName(null);
+                        
+
+                      }}
+                      className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2"
+                    >
+                      {item.name.substring(0, 4)}
+                    </div>
+                    <div className="bg-blue-100 p-2 rounded-lg">
+                      <p className="text-blue-800">{item.message}</p>
+                    </div>
+                  </div>
+                )}
+                {item.email === localStorage.getItem("email") && (
+                  <div className="flex justify-end">
+                    <div className="bg-gray-200 p-2 rounded-lg">
+                      <p className="text-gray-600">{item.message}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="bg-blue-100 p-2 rounded-lg">
-                <p className="text-blue-800">Hello, how are you doing?</p>
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <div className="bg-gray-200 p-2 rounded-lg">
-                <p className="text-gray-600">I'm doing great, thanks!</p>
-              </div>
-            </div>
+            ))}
           </div>
-          <form className="p-4 border-t border-gray-300" onSubmit={handleChat}>
+          <form
+            className="p-4 border-t border-gray-300 relative bottom-3"
+            onSubmit={handleChat}
+          >
             <div className="flex">
               <input
                 ref={messageRef}
