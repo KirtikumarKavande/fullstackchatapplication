@@ -83,5 +83,13 @@ const signInUser = async (req, res, next) => {
     res.status(500).json({ success: false, message: err, statusCode: 500 });
   }
 };
+const getalluser = async (req, res) => {
+  try {
+    const data = await signupUserModel.findAll();
+    res.status(200).json({ success: true, message: data, statusCode: 200 });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err, statusCode: 500 });
+  }
+};
 
-module.exports = { generateAccessToken, signUpUser, signInUser };
+module.exports = { generateAccessToken, signUpUser, signInUser, getalluser };

@@ -3,9 +3,11 @@ const Message = require("../models/messsages");
 const User = require("../models/user");
 
 const saveMessage = async (req, res) => {
+  console.log('WHAJJJJJJJJJJJJJJJJJJJJJJT HAPPENDND,REQ.BODY',req.body)
+
   try {
     const message = await req.user.createMessage({ ...req.body });
-    return res.status(200).json({ success: true, sentMessage: message });
+     res.status(200).json({ success: true, sentMessage: message });
   } catch (err) {
     res.status(400).json({ success: false, message: err });
   }
@@ -29,7 +31,6 @@ const showMessage = async (req, res, next) => {
     });
   });
 
-  console.log(array);
   res.status(200).json(array);
 };
 

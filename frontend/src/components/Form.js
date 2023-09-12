@@ -4,7 +4,6 @@ import { SIGNIN_BACKGROUND_IMAGE, BASE_URL } from "../utilites/constant";
 import FetchData from "../utilites/functions/FetchData";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import ChatHome from "./ChatHome";
 
 const Form = () => {
   const navigate = useNavigate();
@@ -30,7 +29,7 @@ const Form = () => {
       if (!isSignupForm) {
         navigate("/chat");
       }
-      localStorage.setItem('email',form.email)
+      localStorage.setItem("email", form.email);
     } else {
       toast.error(data.message);
     }

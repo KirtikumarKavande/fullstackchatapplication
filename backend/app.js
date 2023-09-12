@@ -8,6 +8,9 @@ const messageRoutes = require("./routes/messageRoutes");
 const user = require("./models/user");
 const message = require("./models/messsages");
 
+const group = require("./models/groups");
+const usergroupMapper = require("./models/usergroupmapper");
+
 const app = express();
 
 app.use(cors({ origin: "http://localhost:3000" }));
@@ -19,6 +22,13 @@ app.use(messageRoutes);
 
 user.hasMany(message);
 message.belongsTo(user);
+
+group.hasMany(message);
+message.belongsTo(group);
+
+user.belongsToMany(group, { through: usergroupMapper });
+group.belongsToMany(user, { through: usergroupMapper });
+
 
 sequelize
   .sync()
