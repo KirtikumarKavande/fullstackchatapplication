@@ -7,19 +7,25 @@ import { BiArrowBack, BiLogOut } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { GrAddCircle } from "react-icons/gr";
+import { MdOutlineDone } from "react-icons/md";
+import { toast } from "react-toastify";
 
 const ChatHome = () => {
   const messageRef = useRef();
+  const groupNameRef = useRef();
   const navigate = useNavigate();
   const [messageData, setMessageData] = useState([]);
   const [knowName, setKnowName] = useState(null);
   const [isShowModel, setIsShowModel] = useState(false);
   const [isCreateNewGroup, setIsCreateNewGroup] = useState(false);
   const [user, setUser] = useState(null);
+  const [addUserTOGroup, setAddUserTOGroup] = useState([]);
+  const [showGroups, setShowGroups] = useState([]);
+  const [SelectedGroup, setSelectedGroup] = useState(null);
   const handleChat = (e) => {
     e.preventDefault();
     FetchData(
-      `${BASE_URL}/savemessage`,
+      `${BASE_URL}/sendgroupmessage?groupId=${SelectedGroup.id}`,
       { message: messageRef.current.value },
       "POST"
     );
@@ -30,6 +36,16 @@ const ChatHome = () => {
     localStorage.clear();
   };
   useEffect(() => {
+    fetch("http://localhost:4000/getgroups", {
+      headers: { Authorization: localStorage.getItem("token") },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((group) => {
+        setShowGroups([...showGroups, ...group.message]);
+      });
+
     fetch("http://localhost:4000/getuser")
       .then((res) => {
         return res.json();
@@ -37,10 +53,10 @@ const ChatHome = () => {
       .then((data) => {
         setUser(data?.message);
       });
-    const id = setInterval(() => {
-      fetchMessage();
-    }, 1000);
-    return () => clearInterval(id);
+    // const id = setInterval(() => {
+    fetchMessage();
+    // }, 1000);
+    // return () => clearInterval(id);
   }, []);
   const fetchMessage = async () => {
     const res = await fetch(`${BASE_URL}/showmessage`, {
@@ -52,13 +68,42 @@ const ChatHome = () => {
 
     const data = await res.json();
     if (!data) return;
-    setMessageData(data);
+    // setMessageData(data);
+  };
+
+  const userTOGroup = (item) => {
+    setAddUserTOGroup([...addUserTOGroup, item]);
+  };
+  // console.log(addUserTOGroup);
+
+  const createGroup = (e) => {
+    e.preventDefault();
+    FetchData(
+      `${BASE_URL}/creategroup`,
+      { groupMember: addUserTOGroup, groupName: groupNameRef.current.value },
+      "POST"
+    );
+
+    toast.info("Group created successfully");
+    setIsCreateNewGroup(false);
+  };
+
+  const perticularGroupData = (item) => {
+    setSelectedGroup(item);
+
+    fetch(`http://localhost:4000/groupmessages?groupID=${item.id}`).then(
+      (res) => {
+        return res.json().then((data) => {
+          setMessageData(data);
+        });
+      }
+    );
   };
 
   return (
-    <div className="bg-gray-200 font-sans">
+    <div className="bg-gray-200 font-sans ">
       <div className="flex h-screen">
-        <div className="w-1/4 bg-[#FFFFFF] text-white p-4">
+        <div className="w-1/4 bg-[#FFFFFF] text-white p-4 ">
           <div className="mb-4">
             {/* <h2 className="text-xl font-semibold">Contacts</h2> */}
             <div className="flex items-center mt-2">
@@ -112,11 +157,32 @@ const ChatHome = () => {
             </div>
           )}
 
-          <div className="text-black">wewewe</div>
+          <hr className="text-red-500" />
+          <div>
+            {showGroups &&
+              showGroups.map((item) => {
+                return (
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => {
+                      perticularGroupData(item);
+                    }}
+                  >
+                    <div className="flex items-center mt-2">
+                      <div className="w-10 h-10 rounded-full bg-blue-500 text-white  mr-6 pl-1 pt-1">
+                        {item.groupname.substring(0, 4)}
+                      </div>
+                      <div className="text-black ">{item?.groupname}</div>
+                    </div>
+                    <hr className="text-red-600 w-full  mt-3" />
+                  </div>
+                );
+              })}
+          </div>
         </div>
 
         {isCreateNewGroup && (
-          <div className="w-1/4 bg-[#FFFFFF] text-white p-4 absolute">
+          <div className="w-1/4 bg-[#FFFFFF] text-white p-4 absolute max-h-screen ">
             <div className="mb-4">
               {/* <h2 className="text-xl font-semibold">Contacts</h2> */}
               <div className="flex items-center mt-2">
@@ -129,24 +195,51 @@ const ChatHome = () => {
 
             {/* <div className="border border-b-black"><input /></div> */}
             <div>
-              <input
-                className="border text-gray-600 border-b-gray-500 w-full outline-none p-1 border-t-white border-x-white"
-                placeholder="Type Email"
-              />
-            </div>
-            <hr className="font-extrabold" />
-            <div>
-              {user &&user.map((item) => {
+              {addUserTOGroup?.map((user) => {
                 return (
-                  <div className="shadow-md p-1 mt-3 flex text-black justify-between">
-                    <div className="text-black ">{item.name}</div>
-                    <div>
-                      {" "}
-                      <GrAddCircle size={21} />{" "}
-                    </div>
-                  </div>
+                  <div className="text-gray-500 inline px-1">{user.name}</div>
                 );
               })}
+
+              <input
+                className="border text-gray-600 border-b-gray-500 w-full outline-none p-1 border-t-white border-x-white"
+                placeholder="Type name"
+              />
+            </div>
+
+            <hr className="font-extrabold" />
+            <div>
+              {user &&
+                user.map((item) => {
+                  if (localStorage.getItem("email") !== item.email) {
+                    return (
+                      <div className="shadow-md p-1 mt-3 flex text-black justify-between">
+                        <div className="text-black ">{item.name}</div>
+                        <button
+                          onClick={() => {
+                            userTOGroup(item);
+                          }}
+                        >
+                          {" "}
+                          <GrAddCircle size={21} />{" "}
+                        </button>
+                      </div>
+                    );
+                  }
+                })}
+            </div>
+            <div className="w-full h-20 mt-2 ">
+              <input
+                className="border text-gray-600 border-b-gray-500 w-full outline-none p-1 border-t-white  border-x-white focus:border-b-blue-500 "
+                placeholder="Type Group Name"
+                ref={groupNameRef}
+              />
+              <button
+                className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center mx-24 my-1 pl-2  mr-2"
+                onClick={createGroup}
+              >
+                <MdOutlineDone size={25} />
+              </button>
             </div>
           </div>
         )}
@@ -167,7 +260,7 @@ const ChatHome = () => {
             </div>
             {messageData.map((item) => (
               <div>
-                {item.email !== localStorage.getItem("email") && (
+                {item?.user?.email !== localStorage.getItem("email") && (
                   <div className="flex mb-4">
                     <div
                       onMouseMove={() => {
@@ -178,14 +271,14 @@ const ChatHome = () => {
                       }}
                       className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2"
                     >
-                      {item.name.substring(0, 4)}
+                      {item?.user?.name.substring(0, 4)}
                     </div>
                     <div className="bg-blue-100 p-2 rounded-lg">
                       <p className="text-blue-800">{item.message}</p>
                     </div>
                   </div>
                 )}
-                {item.email === localStorage.getItem("email") && (
+                {item?.user?.email === localStorage.getItem("email") && (
                   <div className="flex justify-end">
                     <div className="bg-gray-200 p-2 rounded-lg">
                       <p className="text-gray-600">{item.message}</p>

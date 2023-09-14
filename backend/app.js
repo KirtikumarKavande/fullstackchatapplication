@@ -4,6 +4,8 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
 const userRoutes = require("./routes/userRoutes");
+const groupRoutes = require("./routes/groupRoutes");
+
 const messageRoutes = require("./routes/messageRoutes");
 const user = require("./models/user");
 const message = require("./models/messsages");
@@ -19,6 +21,8 @@ app.use(bodyParser.json({ extended: false }));
 
 app.use(userRoutes);
 app.use(messageRoutes);
+app.use(groupRoutes);
+
 
 user.hasMany(message);
 message.belongsTo(user);
