@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { GrAddCircle } from "react-icons/gr";
 import { MdOutlineDone } from "react-icons/md";
+import { RxCross1 } from "react-icons/rx";
+
 import { toast } from "react-toastify";
 
 const ChatHome = () => {
@@ -22,6 +24,10 @@ const ChatHome = () => {
   const [addUserTOGroup, setAddUserTOGroup] = useState([]);
   const [showGroups, setShowGroups] = useState([]);
   const [SelectedGroup, setSelectedGroup] = useState(null);
+  const [isEditGroupInfo, setIsEditGroupInfo] = useState(false);
+  const [memberInPerticularGroup, setMemberInPerticularGroup] = useState([]);
+  console.log("groups??????", showGroups);
+
   const handleChat = (e) => {
     e.preventDefault();
     FetchData(
@@ -91,6 +97,24 @@ const ChatHome = () => {
   const perticularGroupData = (item) => {
     setSelectedGroup(item);
 
+    fetch(
+      `http://localhost:4000/getGroupMember?groupId=${item.id}`,
+
+      {
+        headers: {
+          "content-type": "application/json",
+          Authorization: localStorage.getItem("token"),
+        },
+      }
+    )
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data);
+        setMemberInPerticularGroup([...memberInPerticularGroup, ...data]);
+      });
+
     fetch(`http://localhost:4000/groupmessages?groupID=${item.id}`).then(
       (res) => {
         return res.json().then((data) => {
@@ -99,6 +123,23 @@ const ChatHome = () => {
       }
     );
   };
+  const newMemberToGroup = (item) => {
+    FetchData(
+      `${BASE_URL}/newmember?groupId=${SelectedGroup.id}`,
+      { userId: item.id },
+      "POST"
+    );
+    toast.info("user added to group")
+  };
+  const removeUser=(item)=>{
+
+    FetchData(
+      `${BASE_URL}/removeuser?groupId=${SelectedGroup.id}`,
+      { userId: item.id },
+      "POST"
+    );
+    toast.info("user removed successfully")
+  }
 
   return (
     <div className="bg-gray-200 font-sans ">
@@ -244,12 +285,93 @@ const ChatHome = () => {
           </div>
         )}
 
+        {isEditGroupInfo && (
+          <div className="w-1/4 bg-[#FFFFFF] text-white p-4 absolute max-h-screen ">
+            <div className="mb-4">
+              <div className="flex items-center mt-2">
+                <div className="flex">
+                  <p className="text-black mx-5 font-extrabold">Edit Group</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div className="text-black font-extrabold ml-2">Group Member</div>
+
+              {memberInPerticularGroup?.map((item) => {
+                return (
+                  <div key={item.id} className="flex justify-between">
+                    <div className="text-black"> {item.name} </div>
+                    <div className="text-red-500 cursor-pointer" onClick={()=>{removeUser(item)}}> Remove </div>
+                  </div>
+                );
+              })}
+            </div>
+            <hr className="text-red-600 mb-4" />
+
+            <div>
+              {addUserTOGroup?.map((user) => {
+                return (
+                  <div className="text-gray-500 inline px-1">{user.name}</div>
+                );
+              })}
+
+              <input
+                className="border text-gray-600 border-b-gray-500 w-full outline-none p-1 border-t-white border-x-white"
+                placeholder="Type name"
+              />
+            </div>
+
+            <hr className="font-extrabold" />
+            <div>
+              {user.map((item) => {
+                const isMemberInGroup = memberInPerticularGroup.some(
+                  (member) => member.name === item.name
+                );
+                if (!isMemberInGroup) {
+                  return (
+                    <div
+                      className="shadow-md p-1 mt-3 flex text-black justify-between"
+                      key={item.name}
+                    >
+                      <div className="text-black">{item.name}</div>
+                      <button
+                        onClick={() => {
+                          newMemberToGroup(item);
+                        }}
+                      >
+                        <GrAddCircle size={21} />
+                      </button>
+                    </div>
+                  );
+                }
+
+                return null; // Member is already in the group, so don't render anything.
+              })}
+            </div>
+            <div className="w-full h-20 mt-2 ">
+              <button
+                className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center mx-24 my-1 pl-2  mr-2"
+                onClick={()=>{setIsEditGroupInfo(false);}}
+              >
+                <RxCross1 size={25}/>
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="w-3/4 bg-[#EFEAE2] ">
-          <div className="bg-gray-200 p-4 border-b border-gray-300">
+          <div
+            className="bg-gray-200 p-4 border-b border-gray-300"
+            onClick={() => {
+              setIsEditGroupInfo(true);
+            }}
+          >
             <div className="flex items-center">
               {/* <img src="user-avatar.jpg" alt="User Avatar" className="w-12 h-12 rounded-full mr-2"/> */}
               <div>
-                <p className="text-xl font-semibold">Group chat</p>
+                <p className="text-xl font-semibold">
+                  {SelectedGroup?.groupname}
+                </p>
                 <p className="text-gray-500">Online</p>
               </div>
             </div>

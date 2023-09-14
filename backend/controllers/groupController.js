@@ -62,9 +62,47 @@ const sendMessageToGroup = async (req, res) => {
   }
 };
 
+const getGroupMember = async (req, res) => {
+  const groupId = req.query.groupId;
+
+  try {
+    const group = await Group.findByPk(groupId);
+    console.log(group)
+
+    if (!group) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+
+    const users = await group.getUsers();
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const addNewMemberToGroup=async(req,res)=>{
+    const userId=req.body.userId
+    const groupId=req.query.groupId
+   const data= await UserGroupMappper.create({ userId: userId, groupId: groupId });
+   res.send(data)
+
+
+}
+const removeUserFromGroup = async (req, res)=>{
+    const userId=req.body.userId
+    const groupId=req.query.groupId
+    console.log(userId,groupId)
+    UserGroupMappper.destroy({ where: { userId: userId, groupId: groupId } })
+}
+
 module.exports = {
   createUserGroup,
   getgroup,
   getGroupMessages,
   sendMessageToGroup,
+  getGroupMember,
+  addNewMemberToGroup
+  ,removeUserFromGroup
 };
