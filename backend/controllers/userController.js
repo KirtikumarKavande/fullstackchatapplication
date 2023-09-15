@@ -65,6 +65,7 @@ const signInUser = async (req, res, next) => {
             message: "sign in success",
             token: generateAccessToken(data[0].id, data[0].name),
             statusCode: 200,
+            data,
           });
         } else {
           res.status(400).json({

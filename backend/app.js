@@ -9,6 +9,17 @@ const groupRoutes = require("./routes/groupRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const user = require("./models/user");
 const message = require("./models/messsages");
+const io=require('socket.io')(5000,{
+  origin:['http://localhost:3000/']
+})
+
+io.on("connection",socket=>{
+  console.log(socket.id)
+  
+  socket.on("send-message",data=>{
+  socket.broadcast.emit('message',data)
+  })
+})
 
 const group = require("./models/groups");
 const usergroupMapper = require("./models/usergroupmapper");

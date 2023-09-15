@@ -9,10 +9,12 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { GrAddCircle } from "react-icons/gr";
 import { MdOutlineDone } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
+import { io } from "socket.io-client";
 
 import { toast } from "react-toastify";
 
 const ChatHome = () => {
+  const socket = io("http://localhost:5000");
   const messageRef = useRef();
   const groupNameRef = useRef();
   const navigate = useNavigate();
@@ -26,7 +28,6 @@ const ChatHome = () => {
   const [SelectedGroup, setSelectedGroup] = useState(null);
   const [isEditGroupInfo, setIsEditGroupInfo] = useState(false);
   const [memberInPerticularGroup, setMemberInPerticularGroup] = useState([]);
-  console.log("groups??????", showGroups);
 
   const handleChat = (e) => {
     e.preventDefault();
@@ -35,8 +36,23 @@ const ChatHome = () => {
       { message: messageRef.current.value },
       "POST"
     );
+    socket.emit("send-message", {
+      message: messageRef.current.value,
+      groupId: SelectedGroup.id,
+      user: {
+        name: localStorage.getItem("name"),
+        email: localStorage.getItem("email"),
+      },
+    });
     messageRef.current.value = "";
   };
+
+  socket.on("message", (msg) => {
+    if (msg.groupId === SelectedGroup?.id) {
+      setMessageData([...messageData, msg]);
+    }
+    console.log("fibroadcasted msg", msg);
+  });
   const logout = () => {
     navigate("/");
     localStorage.clear();
@@ -129,17 +145,17 @@ const ChatHome = () => {
       { userId: item.id },
       "POST"
     );
-    toast.info("user added to group")
+    toast.info("user added to group");
   };
-  const removeUser=(item)=>{
-
+  const removeUser = (item) => {
     FetchData(
       `${BASE_URL}/removeuser?groupId=${SelectedGroup.id}`,
       { userId: item.id },
       "POST"
     );
-    toast.info("user removed successfully")
-  }
+    toast.info("user removed successfully");
+  };
+  console.log("message data",messageData)
 
   return (
     <div className="bg-gray-200 font-sans ">
@@ -169,7 +185,7 @@ const ChatHome = () => {
             <div className="w-28 h-24 p-2 shadow-md rounded-lg bg-[#E5E7EB] absolute ">
               <div className="space-y-3">
                 <div
-                  className="text-gray-600 hover:bg-[#D9DBDF] w-full"
+                  className="text-gray-600 hover:bg-[#D9DBDF] w-full cursor-pointer"
                   onClick={() => {
                     setIsCreateNewGroup(true);
                     setIsShowModel(false);
@@ -301,7 +317,15 @@ const ChatHome = () => {
                 return (
                   <div key={item.id} className="flex justify-between">
                     <div className="text-black"> {item.name} </div>
-                    <div className="text-red-500 cursor-pointer" onClick={()=>{removeUser(item)}}> Remove </div>
+                    <div
+                      className="text-red-500 cursor-pointer"
+                      onClick={() => {
+                        removeUser(item);
+                      }}
+                    >
+                      {" "}
+                      Remove{" "}
+                    </div>
                   </div>
                 );
               })}
@@ -351,9 +375,11 @@ const ChatHome = () => {
             <div className="w-full h-20 mt-2 ">
               <button
                 className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center mx-24 my-1 pl-2  mr-2"
-                onClick={()=>{setIsEditGroupInfo(false);}}
+                onClick={() => {
+                  setIsEditGroupInfo(false);
+                }}
               >
-                <RxCross1 size={25}/>
+                <RxCross1 size={25} />
               </button>
             </div>
           </div>

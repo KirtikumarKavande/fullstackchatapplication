@@ -5,6 +5,7 @@ const Messages = require("../models/messsages");
 
 const UserGroupMappper = require("../models/usergroupmapper");
 
+
 const createUserGroup = async (req, res) => {
   try {
     const data = await req.user.createGroup({
@@ -48,7 +49,9 @@ const getGroupMessages = async (req, res, next) => {
 
 const sendMessageToGroup = async (req, res) => {
   const groupId = req.query.groupId;
-  console.log(req.body, groupId);
+  // console.log(req.body, groupId);
+
+  
   try {
     const message = await req.user.createMessage({
       ...req.body,

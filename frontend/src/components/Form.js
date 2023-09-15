@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useForm from "../hooks/useForm";
 import { SIGNIN_BACKGROUND_IMAGE, BASE_URL } from "../utilites/constant";
 import FetchData from "../utilites/functions/FetchData";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import User from "../store/user";
 
 const Form = () => {
+  const user = useContext(User);
+  console.log("ctx", user);
   const navigate = useNavigate();
 
   const { form, onchangeFunction } = useForm();
@@ -20,6 +23,8 @@ const Form = () => {
       "POST"
     );
     if (data.statusCode === 200) {
+      console.log("sign in user ", data);
+      localStorage.setItem("name", data.data[0].name);
       toast.success(
         `${
           isSignupForm ? "signup successful plz signIn " : "signin successful"
