@@ -3,7 +3,7 @@ const Message = require("../models/messsages");
 const User = require("../models/user");
 
 const saveMessage = async (req, res) => {
-  console.log('WHAJJJJJJJJJJJJJJJJJJJJJJT HAPPENDND,REQ.BODY',req.body)
+  console.log('REQ.BODY',req.body)
 
   try {
     const message = await req.user.createMessage({ ...req.body });

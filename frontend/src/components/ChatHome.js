@@ -28,6 +28,7 @@ const ChatHome = () => {
   const [SelectedGroup, setSelectedGroup] = useState(null);
   const [isEditGroupInfo, setIsEditGroupInfo] = useState(false);
   const [memberInPerticularGroup, setMemberInPerticularGroup] = useState([]);
+  const [socketMsg, setSocketMsg] = useState();
 
   const handleChat = (e) => {
     e.preventDefault();
@@ -48,6 +49,8 @@ const ChatHome = () => {
   };
 
   socket.on("message", (msg) => {
+    setSocketMsg(msg);
+
     if (msg.groupId === SelectedGroup?.id) {
       setMessageData([...messageData, msg]);
     }
@@ -134,6 +137,7 @@ const ChatHome = () => {
     fetch(`http://localhost:4000/groupmessages?groupID=${item.id}`).then(
       (res) => {
         return res.json().then((data) => {
+          setSocketMsg(null)
           setMessageData(data);
         });
       }
@@ -155,7 +159,7 @@ const ChatHome = () => {
     );
     toast.info("user removed successfully");
   };
-  console.log("message data",messageData)
+  console.log("message data", messageData);
 
   return (
     <div className="bg-gray-200 font-sans ">
@@ -406,7 +410,12 @@ const ChatHome = () => {
             <div className=" w-fit h-fit text-gray-700  border border-white shadow-lg absolute left-[600px]">
               {knowName}
             </div>
-            {messageData.map((item) => (
+
+
+
+
+
+            { messageData.map((item) => (
               <div>
                 {item?.user?.email !== localStorage.getItem("email") && (
                   <div className="flex mb-4">
@@ -435,6 +444,83 @@ const ChatHome = () => {
                 )}
               </div>
             ))}
+
+
+
+
+{/* 
+{socketMsg?.groupId===SelectedGroup?.id&&  messageData.map((item) => (
+              <div>
+                {item?.user?.email !== localStorage.getItem("email") && (
+                  <div className="flex mb-4">
+                    <div
+                      onMouseMove={() => {
+                        setKnowName(item.name);
+                      }}
+                      onMouseOut={() => {
+                        setKnowName(null);
+                      }}
+                      className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2"
+                    >
+                      {item?.user?.name.substring(0, 4)}
+                    </div>
+                    <div className="bg-blue-100 p-2 rounded-lg">
+                      <p className="text-blue-800">{item.message}</p>
+                    </div>
+                  </div>
+                )}
+                {item?.user?.email === localStorage.getItem("email") && (
+                  <div className="flex justify-end">
+                    <div className="bg-gray-200 p-2 rounded-lg">
+                      <p className="text-gray-600">{item.message}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))} */}
+
+
+
+
+
+
+
+{/* {socketMsg && socketMsg?.groupId!==SelectedGroup?.id&& messageData.map((item) => (
+              <div>
+                {item?.user?.email !== localStorage.getItem("email") && (
+                  <div className="flex mb-4">
+                    <div
+                      onMouseMove={() => {
+                        setKnowName(item.name);
+                      }}
+                      onMouseOut={() => {
+                        setKnowName(null);
+                      }}
+                      className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2"
+                    >
+                      {item?.user?.name.substring(0, 4)}
+                    </div>
+                    <div className="bg-blue-100 p-2 rounded-lg">
+                      <p className="text-blue-800">{item.message}</p>
+                    </div>
+                  </div>
+                )}
+                {item?.user?.email === localStorage.getItem("email") && (
+                  <div className="flex justify-end">
+                    <div className="bg-gray-200 p-2 rounded-lg">
+                      <p className="text-gray-600">{item.message}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))} */}
+
+
+
+
+
+
+
           </div>
           <form
             className="p-4 border-t border-gray-300 relative bottom-3"

@@ -5,7 +5,6 @@ const Messages = require("../models/messsages");
 
 const UserGroupMappper = require("../models/usergroupmapper");
 
-
 const createUserGroup = async (req, res) => {
   try {
     const data = await req.user.createGroup({
@@ -51,7 +50,6 @@ const sendMessageToGroup = async (req, res) => {
   const groupId = req.query.groupId;
   // console.log(req.body, groupId);
 
-  
   try {
     const message = await req.user.createMessage({
       ...req.body,
@@ -70,7 +68,7 @@ const getGroupMember = async (req, res) => {
 
   try {
     const group = await Group.findByPk(groupId);
-    console.log(group)
+    console.log(group);
 
     if (!group) {
       return res.status(404).json({ error: "Group not found" });
@@ -85,20 +83,21 @@ const getGroupMember = async (req, res) => {
   }
 };
 
-const addNewMemberToGroup=async(req,res)=>{
-    const userId=req.body.userId
-    const groupId=req.query.groupId
-   const data= await UserGroupMappper.create({ userId: userId, groupId: groupId });
-   res.send(data)
-
-
-}
-const removeUserFromGroup = async (req, res)=>{
-    const userId=req.body.userId
-    const groupId=req.query.groupId
-    console.log(userId,groupId)
-    UserGroupMappper.destroy({ where: { userId: userId, groupId: groupId } })
-}
+const addNewMemberToGroup = async (req, res) => {
+  const userId = req.body.userId;
+  const groupId = req.query.groupId;
+  const data = await UserGroupMappper.create({
+    userId: userId,
+    groupId: groupId,
+  });
+  res.send(data);
+};
+const removeUserFromGroup = async (req, res) => {
+  const userId = req.body.userId;
+  const groupId = req.query.groupId;
+  console.log(userId, groupId);
+  UserGroupMappper.destroy({ where: { userId: userId, groupId: groupId } });
+};
 
 module.exports = {
   createUserGroup,
@@ -106,6 +105,6 @@ module.exports = {
   getGroupMessages,
   sendMessageToGroup,
   getGroupMember,
-  addNewMemberToGroup
-  ,removeUserFromGroup
+  addNewMemberToGroup,
+  removeUserFromGroup,
 };
