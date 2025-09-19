@@ -11,9 +11,8 @@ import { MdOutlineDone } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 import { io } from "socket.io-client";
 
-import { toast } from "react-toastify";
-  const socket = io("http://localhost:4000");
 
+import { toast } from "react-toastify";
 const ChatHome = () => {
   const messageRef = useRef();
   const groupNameRef = useRef();
@@ -29,6 +28,8 @@ const ChatHome = () => {
   const [isEditGroupInfo, setIsEditGroupInfo] = useState(false);
   const [memberInPerticularGroup, setMemberInPerticularGroup] = useState([]);
   const [socketMsg, setSocketMsg] = useState();
+  const [socket, setSocket] = useState(null);
+
 
   const handleChat = (e) => {
     e.preventDefault();
@@ -48,21 +49,22 @@ const ChatHome = () => {
     messageRef.current.value = "";
   };
 
-  
+
   const logout = () => {
     navigate("/");
     localStorage.clear();
   };
   useEffect(() => {
+    const newSocket = io("http://localhost:4000");
+    setSocket(newSocket);
+    newSocket.on("message", (msg) => {
+      setSocketMsg(msg);
 
-    socket.on("message", (msg) => {
-    setSocketMsg(msg);
-
-    if (msg.groupId === SelectedGroup?.id) {
-      setMessageData([...messageData, msg]);
-    }
-    console.log("fibroadcasted msg", msg);
-  });
+      if (msg.groupId === SelectedGroup?.id) {
+        setMessageData([...messageData, msg]);
+      }
+      console.log("fibroadcasted msg", msg);
+    });
     fetch("http://localhost:4000/getgroups", {
       headers: { Authorization: localStorage.getItem("token") },
     })
@@ -80,10 +82,7 @@ const ChatHome = () => {
       .then((data) => {
         setUser(data?.message);
       });
-    // const id = setInterval(() => {
     fetchMessage();
-    // }, 1000);
-    // return () => clearInterval(id);
   }, []);
   const fetchMessage = async () => {
     const res = await fetch(`${BASE_URL}/showmessage`, {
@@ -188,7 +187,7 @@ const ChatHome = () => {
             </div>
           </div>
           {isShowModel && (
-            <div className="w-60  p-2 shadow-md rounded-lg bg-[#E5E7EB] absolute space-y-3" onBlur={()=>{console.log("hello");}}>
+            <div className="w-60  p-2 shadow-md rounded-lg bg-[#E5E7EB] absolute space-y-3" onBlur={() => { console.log("hello"); }}>
 
               {
                 chatMenuitems.map((options) => {
