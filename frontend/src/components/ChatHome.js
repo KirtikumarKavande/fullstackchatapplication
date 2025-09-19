@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 
 import FetchData from "../utilites/functions/FetchData";
-import { BASE_URL } from "../utilites/constant";
+import { BASE_URL, chatMenuitems } from "../utilites/constant";
 import { BiArrowBack, BiLogOut } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -12,9 +12,9 @@ import { RxCross1 } from "react-icons/rx";
 import { io } from "socket.io-client";
 
 import { toast } from "react-toastify";
+  const socket = io("http://localhost:4000");
 
 const ChatHome = () => {
-  const socket = io("http://localhost:5000");
   const messageRef = useRef();
   const groupNameRef = useRef();
   const navigate = useNavigate();
@@ -48,7 +48,14 @@ const ChatHome = () => {
     messageRef.current.value = "";
   };
 
-  socket.on("message", (msg) => {
+  
+  const logout = () => {
+    navigate("/");
+    localStorage.clear();
+  };
+  useEffect(() => {
+
+    socket.on("message", (msg) => {
     setSocketMsg(msg);
 
     if (msg.groupId === SelectedGroup?.id) {
@@ -56,11 +63,6 @@ const ChatHome = () => {
     }
     console.log("fibroadcasted msg", msg);
   });
-  const logout = () => {
-    navigate("/");
-    localStorage.clear();
-  };
-  useEffect(() => {
     fetch("http://localhost:4000/getgroups", {
       headers: { Authorization: localStorage.getItem("token") },
     })
@@ -186,34 +188,32 @@ const ChatHome = () => {
             </div>
           </div>
           {isShowModel && (
-            <div className="w-28 h-24 p-2 shadow-md rounded-lg bg-[#E5E7EB] absolute ">
-              <div className="space-y-3">
-                <div
-                  className="text-gray-600 hover:bg-[#D9DBDF] w-full cursor-pointer"
-                  onClick={() => {
-                    setIsCreateNewGroup(true);
-                    setIsShowModel(false);
-                  }}
-                >
-                  New group
-                </div>
-                <div>
-                  <button
-                    className="text-gray-600 hover:bg-[#D9DBDF] w-full text-left"
-                    onClick={logout}
-                  >
-                    {" "}
-                    Logout
-                  </button>
-                </div>
-                <div
-                  className="text-gray-500"
-                  onClick={() => {
-                    setIsShowModel(false);
-                  }}
-                >
-                  <BiArrowBack />{" "}
-                </div>
+            <div className="w-60  p-2 shadow-md rounded-lg bg-[#E5E7EB] absolute space-y-3" onBlur={()=>{console.log("hello");}}>
+
+              {
+                chatMenuitems.map((options) => {
+                  return (
+                    <div
+                      className="text-gray-600 hover:bg-[#D9DBDF] w-full cursor-pointer"
+                      onClick={() => {
+                        setIsCreateNewGroup(true);
+                        setIsShowModel(false);
+                      }}
+                    >
+                      {options.label}
+                    </div>
+                  )
+
+                })
+              }
+
+              <div
+                className="text-gray-500"
+                onClick={() => {
+                  setIsShowModel(false);
+                }}
+              >
+                <BiArrowBack />{" "}
               </div>
             </div>
           )}
@@ -415,7 +415,7 @@ const ChatHome = () => {
 
 
 
-            { messageData.map((item) => (
+            {messageData.map((item) => (
               <div>
                 {item?.user?.email !== localStorage.getItem("email") && (
                   <div className="flex mb-4">
@@ -448,7 +448,7 @@ const ChatHome = () => {
 
 
 
-{/* 
+            {/* 
 {socketMsg?.groupId===SelectedGroup?.id&&  messageData.map((item) => (
               <div>
                 {item?.user?.email !== localStorage.getItem("email") && (
@@ -485,7 +485,7 @@ const ChatHome = () => {
 
 
 
-{/* {socketMsg && socketMsg?.groupId!==SelectedGroup?.id&& messageData.map((item) => (
+            {/* {socketMsg && socketMsg?.groupId!==SelectedGroup?.id&& messageData.map((item) => (
               <div>
                 {item?.user?.email !== localStorage.getItem("email") && (
                   <div className="flex mb-4">

@@ -24,10 +24,12 @@ const Form = () => {
     );
     if (data.statusCode === 200) {
       console.log("sign in user ", data);
-      localStorage.setItem("name", data.data[0].name);
+      if (data?.data?.length  && "name" in data.data[0]) {
+        localStorage.setItem("name", data.data[0].name);
+
+      }
       toast.success(
-        `${
-          isSignupForm ? "signup successful plz signIn " : "signin successful"
+        `${isSignupForm ? "signup successful plz signIn " : "signin successful"
         } `
       );
       localStorage.setItem("token", data.token);
