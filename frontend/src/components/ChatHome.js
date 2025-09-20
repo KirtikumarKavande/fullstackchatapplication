@@ -13,6 +13,8 @@ import { io } from "socket.io-client";
 
 
 import { toast } from "react-toastify";
+import LeftPanel from "./LeftPanel";
+import CreateNewGroup from "./CreateNewGroup";
 const ChatHome = () => {
   const messageRef = useRef();
   const groupNameRef = useRef();
@@ -75,13 +77,7 @@ const ChatHome = () => {
         setShowGroups([...showGroups, ...group.message]);
       });
 
-    fetch("http://localhost:4000/getuser")
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        setUser(data?.message);
-      });
+
     fetchMessage();
   }, []);
   const fetchMessage = async () => {
@@ -102,17 +98,6 @@ const ChatHome = () => {
   };
   // console.log(addUserTOGroup);
 
-  const createGroup = (e) => {
-    e.preventDefault();
-    FetchData(
-      `${BASE_URL}/creategroup`,
-      { groupMember: addUserTOGroup, groupName: groupNameRef.current.value },
-      "POST"
-    );
-
-    toast.info("Group created successfully");
-    setIsCreateNewGroup(false);
-  };
 
   const perticularGroupData = (item) => {
     setSelectedGroup(item);
@@ -162,6 +147,35 @@ const ChatHome = () => {
   };
   console.log("message data", messageData);
 
+  function populateContacts(params) {
+    console.log("contacts");
+
+  }
+  function createNewGroup() {
+    setIsCreateNewGroup(true);
+    setIsShowModel(false);
+
+  }
+
+
+  function handleLogout() {
+
+  }
+
+  const menuItemsMap = new Map([
+    ['contacts', populateContacts],
+    ['newGroup', createNewGroup],
+    ['logout', handleLogout]
+
+  ])
+  const handleMenuSelected = (key) => {
+    const handler = menuItemsMap.get(key)
+    if (handler && typeof handler === 'function') {
+      handler()
+    }
+  }
+
+
   return (
     <div className="bg-gray-200 font-sans ">
       <div className="flex h-screen">
@@ -188,15 +202,14 @@ const ChatHome = () => {
           </div>
           {isShowModel && (
             <div className="w-60  p-2 shadow-md rounded-lg bg-[#E5E7EB] absolute space-y-3" onBlur={() => { console.log("hello"); }}>
-
               {
                 chatMenuitems.map((options) => {
                   return (
                     <div
                       className="text-gray-600 hover:bg-[#D9DBDF] w-full cursor-pointer"
                       onClick={() => {
-                        setIsCreateNewGroup(true);
-                        setIsShowModel(false);
+                        handleMenuSelected(options.key)
+
                       }}
                     >
                       {options.label}
@@ -205,7 +218,6 @@ const ChatHome = () => {
 
                 })
               }
-
               <div
                 className="text-gray-500"
                 onClick={() => {
@@ -242,66 +254,10 @@ const ChatHome = () => {
         </div>
 
         {isCreateNewGroup && (
-          <div className="w-1/4 bg-[#FFFFFF] text-white p-4 absolute max-h-screen ">
-            <div className="mb-4">
-              {/* <h2 className="text-xl font-semibold">Contacts</h2> */}
-              <div className="flex items-center mt-2">
-                {/* <img src="user-avatar.jpg" alt="User Avatar" className="w-10 h-10 rounded-full mr-2"/> */}
-                <div className="flex">
-                  <p className="text-black mx-5 font-extrabold">Create Group</p>
-                </div>
-              </div>
-            </div>
 
-            {/* <div className="border border-b-black"><input /></div> */}
-            <div>
-              {addUserTOGroup?.map((user) => {
-                return (
-                  <div className="text-gray-500 inline px-1">{user.name}</div>
-                );
-              })}
-
-              <input
-                className="border text-gray-600 border-b-gray-500 w-full outline-none p-1 border-t-white border-x-white"
-                placeholder="Type name"
-              />
-            </div>
-
-            <hr className="font-extrabold" />
-            <div>
-              {user &&
-                user.map((item) => {
-                  if (localStorage.getItem("email") !== item.email) {
-                    return (
-                      <div className="shadow-md p-1 mt-3 flex text-black justify-between">
-                        <div className="text-black ">{item.name}</div>
-                        <button
-                          onClick={() => {
-                            userTOGroup(item);
-                          }}
-                        >
-                          {" "}
-                          <GrAddCircle size={21} />{" "}
-                        </button>
-                      </div>
-                    );
-                  }
-                })}
-            </div>
-            <div className="w-full h-20 mt-2 ">
-              <input
-                className="border text-gray-600 border-b-gray-500 w-full outline-none p-1 border-t-white  border-x-white focus:border-b-blue-500 "
-                placeholder="Type Group Name"
-                ref={groupNameRef}
-              />
-              <button
-                className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center mx-24 my-1 pl-2  mr-2"
-                onClick={createGroup}
-              >
-                <MdOutlineDone size={25} />
-              </button>
-            </div>
-          </div>
+          <LeftPanel title={"Create a Group"}>
+            <CreateNewGroup setIsCreateNewGroup={setIsCreateNewGroup} />
+          </LeftPanel>
         )}
 
         {isEditGroupInfo && (
@@ -443,82 +399,6 @@ const ChatHome = () => {
                 )}
               </div>
             ))}
-
-
-
-
-            {/* 
-{socketMsg?.groupId===SelectedGroup?.id&&  messageData.map((item) => (
-              <div>
-                {item?.user?.email !== localStorage.getItem("email") && (
-                  <div className="flex mb-4">
-                    <div
-                      onMouseMove={() => {
-                        setKnowName(item.name);
-                      }}
-                      onMouseOut={() => {
-                        setKnowName(null);
-                      }}
-                      className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2"
-                    >
-                      {item?.user?.name.substring(0, 4)}
-                    </div>
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <p className="text-blue-800">{item.message}</p>
-                    </div>
-                  </div>
-                )}
-                {item?.user?.email === localStorage.getItem("email") && (
-                  <div className="flex justify-end">
-                    <div className="bg-gray-200 p-2 rounded-lg">
-                      <p className="text-gray-600">{item.message}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))} */}
-
-
-
-
-
-
-
-            {/* {socketMsg && socketMsg?.groupId!==SelectedGroup?.id&& messageData.map((item) => (
-              <div>
-                {item?.user?.email !== localStorage.getItem("email") && (
-                  <div className="flex mb-4">
-                    <div
-                      onMouseMove={() => {
-                        setKnowName(item.name);
-                      }}
-                      onMouseOut={() => {
-                        setKnowName(null);
-                      }}
-                      className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2"
-                    >
-                      {item?.user?.name.substring(0, 4)}
-                    </div>
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <p className="text-blue-800">{item.message}</p>
-                    </div>
-                  </div>
-                )}
-                {item?.user?.email === localStorage.getItem("email") && (
-                  <div className="flex justify-end">
-                    <div className="bg-gray-200 p-2 rounded-lg">
-                      <p className="text-gray-600">{item.message}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))} */}
-
-
-
-
-
-
 
           </div>
           <form
