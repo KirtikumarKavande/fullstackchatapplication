@@ -7,13 +7,18 @@ import { MdOutlineDone } from 'react-icons/md';
 import FetchData from '../utilites/functions/FetchData';
 import { BASE_URL } from '../utilites/constant';
 import { toast } from 'react-toastify';
+import { getFriendList } from '../store/redux/slices/friendList.slice';
+import { useDispatch, useSelector } from 'react-redux';
+
 
 const CreateNewGroup = (props) => {
-    const {setIsCreateNewGroup}=props
+    const { setIsCreateNewGroup } = props
     const [addUserTOGroup, setAddUserTOGroup] = useState([]);
     const [user, setUser] = useState(null);
-      const groupNameRef = useRef();
-    
+    const groupNameRef = useRef();
+    const friends = useSelector((store) => store.friendList.friends)
+    const dispatch = useDispatch()
+
 
     const userTOGroup = (item) => {
         setAddUserTOGroup([...addUserTOGroup, item]);
@@ -21,27 +26,40 @@ const CreateNewGroup = (props) => {
 
 
     useEffect(() => {
+        if (friends.length) {
+            setUser(friends.message)
+        } else {
+            fetchFriendsData()
+        }
+
+
+
+    }, [])
+
+
+    function fetchFriendsData() {
         fetch("http://localhost:4000/getuser")
             .then((res) => {
                 return res.json();
             })
             .then((data) => {
                 setUser(data?.message);
+               dispatch(getFriendList(data?.message))
+
             });
-    }, [])
+    }
 
+    const createGroup = (e) => {
+        e.preventDefault();
+        FetchData(
+            `${BASE_URL}/creategroup`,
+            { groupMember: addUserTOGroup, groupName: groupNameRef.current.value },
+            "POST"
+        );
 
-     const createGroup = (e) => {
-    e.preventDefault();
-    FetchData(
-      `${BASE_URL}/creategroup`,
-      { groupMember: addUserTOGroup, groupName: groupNameRef.current.value },
-      "POST"
-    );
-
-    toast.info("Group created successfully");
-    setIsCreateNewGroup(false);
-  };
+        toast.info("Group created successfully");
+        setIsCreateNewGroup(false);
+    };
 
     return (
         <>
