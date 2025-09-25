@@ -15,6 +15,8 @@ import { io } from "socket.io-client";
 import { toast } from "react-toastify";
 import LeftPanel from "./LeftPanel";
 import CreateNewGroup from "./CreateNewGroup";
+import FriendList from "./FriendList";
+import ChatWindow from "./ChatWindow";
 const ChatHome = () => {
   const messageRef = useRef();
   const groupNameRef = useRef();
@@ -31,7 +33,8 @@ const ChatHome = () => {
   const [memberInPerticularGroup, setMemberInPerticularGroup] = useState([]);
   const [socketMsg, setSocketMsg] = useState();
   const [socket, setSocket] = useState(null);
-
+  const [isShowContacts, setIsShowContacts] = useState(false)
+const [chatId,setChatId]=useState("")
 
   const handleChat = (e) => {
     e.preventDefault();
@@ -93,10 +96,7 @@ const ChatHome = () => {
     // setMessageData(data);
   };
 
-  const userTOGroup = (item) => {
-    setAddUserTOGroup([...addUserTOGroup, item]);
-  };
-  // console.log(addUserTOGroup);
+
 
 
   const perticularGroupData = (item) => {
@@ -148,7 +148,11 @@ const ChatHome = () => {
   console.log("message data", messageData);
 
   function populateContacts(params) {
-    console.log("contacts");
+    setIsCreateNewGroup(false);
+    setIsShowModel(false);
+
+    setIsShowContacts(true)
+
 
   }
   function createNewGroup() {
@@ -237,7 +241,9 @@ const ChatHome = () => {
                   <div
                     className="cursor-pointer"
                     onClick={() => {
-                      perticularGroupData(item);
+                      if("id" in item){
+                      setChatId(item.id);
+                      }
                     }}
                   >
                     <div className="flex items-center mt-2">
@@ -259,6 +265,13 @@ const ChatHome = () => {
             <CreateNewGroup setIsCreateNewGroup={setIsCreateNewGroup} />
           </LeftPanel>
         )}
+        {
+          isShowContacts && (
+            <LeftPanel title={"Chat with Friends"}>
+              <FriendList isPersonalChat={true} setIsCreateNewGroup={() => { }} />
+            </LeftPanel>
+          )
+        }
 
         {isEditGroupInfo && (
           <div className="w-1/4 bg-[#FFFFFF] text-white p-4 absolute max-h-screen ">
@@ -344,7 +357,10 @@ const ChatHome = () => {
           </div>
         )}
 
-        <div className="w-3/4 bg-[#EFEAE2] ">
+
+        <ChatWindow chatId={chatId}/>
+
+        {/* <div className="w-3/4 bg-[#EFEAE2] ">
           <div
             className="bg-gray-200 p-4 border-b border-gray-300"
             onClick={() => {
@@ -352,7 +368,6 @@ const ChatHome = () => {
             }}
           >
             <div className="flex items-center">
-              {/* <img src="user-avatar.jpg" alt="User Avatar" className="w-12 h-12 rounded-full mr-2"/> */}
               <div>
                 <p className="text-xl font-semibold">
                   {SelectedGroup?.groupname}
@@ -417,7 +432,7 @@ const ChatHome = () => {
               </button>
             </div>
           </form>
-        </div>
+        </div> */}
       </div>
     </div>
   );
