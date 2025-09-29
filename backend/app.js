@@ -15,14 +15,38 @@ const user = require("./models/user");
 const message = require("./models/messsages");
 const group = require("./models/groups");
 const usergroupMapper = require("./models/usergroupmapper");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const server = http.createServer(app); // ✅ create HTTP server
-const io = new Server(server, {
-  cors: { origin: "http://localhost:3000" }
-});
 
-// Socket.IO logic
+const { createAdapter } =require ("@socket.io/redis-adapter");
+const { Redis }= require ("ioredis");
+
+const pubClient = new Redis();
+const subClient = pubClient.duplicate();
+
+
+const io = new Server(server, {
+  cors: { origin: "http://localhost:3000" },
+  adapter:createAdapter(pubClient, subClient)
+});
+io.use((socket,next)=>{
+
+  try {
+   const {token} =socket.handshake.auth
+  const user = jwt.verify(token, "98kirtikmarseqnjde132323123232kjcdbcf");
+
+   console.log("user data",user)
+
+
+  next()
+
+  } catch (error) {
+    console.log(error);
+  }
+})
+
 io.on("connection", (socket) => {
   console.log("⚡ User connected:", socket.id);
 
