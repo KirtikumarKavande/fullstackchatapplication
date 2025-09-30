@@ -13,7 +13,7 @@ import { io } from "socket.io-client";
 
 
 import { toast } from "react-toastify";
-import LeftPanel from "./LeftPanel";
+import LeftPopup from "./LeftPopup";
 import CreateNewGroup from "./CreateNewGroup";
 import FriendList from "./FriendList";
 import ChatWindow from "./ChatWindow";
@@ -264,15 +264,15 @@ const ChatHome = () => {
 
         {isCreateNewGroup && (
 
-          <LeftPanel title={"Create a Group"}>
+          <LeftPopup title={"Create a Group"}>
             <CreateNewGroup setIsCreateNewGroup={setIsCreateNewGroup} />
-          </LeftPanel>
+          </LeftPopup>
         )}
         {
           isShowContacts && (
-            <LeftPanel title={"Chat with Friends"}>
+            <LeftPopup title={"Chat with Friends"}>
               <FriendList isPersonalChat={true} setIsCreateNewGroup={() => { }} />
-            </LeftPanel>
+            </LeftPopup>
           )
         }
 
