@@ -15,7 +15,6 @@ const ChatWindow = (props) => {
     function handleChat(e) {
         e.preventDefault()
              console.log("chatid",chatId,messageRef.current.value);
-
     }
     return (
 

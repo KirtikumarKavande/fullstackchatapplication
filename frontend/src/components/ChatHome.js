@@ -34,7 +34,7 @@ const ChatHome = () => {
   const [socketMsg, setSocketMsg] = useState();
   const [socket, setSocket] = useState(null);
   const [isShowContacts, setIsShowContacts] = useState(false)
-const [chatId,setChatId]=useState("")
+  const [chatId, setChatId] = useState("")
 
   const handleChat = (e) => {
     e.preventDefault();
@@ -55,12 +55,16 @@ const [chatId,setChatId]=useState("")
   };
 
 
-  const logout = () => {
-    navigate("/");
-    localStorage.clear();
-  };
+  // const logout = () => {
+  //   navigate("/");
+  //   localStorage.clear();
+  // };
   useEffect(() => {
-    const newSocket = io("http://localhost:4000");
+    const token = localStorage.getItem("token");
+
+    const newSocket = io("http://localhost:4000", {
+      auth: { token }, 
+    });
     setSocket(newSocket);
     newSocket.on("message", (msg) => {
       setSocketMsg(msg);
@@ -68,7 +72,6 @@ const [chatId,setChatId]=useState("")
       if (msg.groupId === SelectedGroup?.id) {
         setMessageData([...messageData, msg]);
       }
-      console.log("fibroadcasted msg", msg);
     });
     fetch("http://localhost:4000/getgroups", {
       headers: { Authorization: localStorage.getItem("token") },
@@ -241,8 +244,8 @@ const [chatId,setChatId]=useState("")
                   <div
                     className="cursor-pointer"
                     onClick={() => {
-                      if("id" in item){
-                      setChatId(item.id);
+                      if ("id" in item) {
+                        setChatId(item.id);
                       }
                     }}
                   >
@@ -358,7 +361,7 @@ const [chatId,setChatId]=useState("")
         )}
 
 
-        <ChatWindow chatId={chatId}/>
+        <ChatWindow chatId={chatId} />
 
         {/* <div className="w-3/4 bg-[#EFEAE2] ">
           <div
