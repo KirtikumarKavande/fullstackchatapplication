@@ -22,9 +22,32 @@ const createUserGroup = async (req, res) => {
 
 const getgroup = async (req, res) => {
   try {
-    const data = await req.user.getGroups({ through: { userId: req.user.id } });
-    res.status(200).json({ success: true, message: data, statusCode: 200 });
+    const pageNumber = parseInt(req.query.pageNumber);
+    const limit = parseInt(req.query.limit);
+    console.log(pageNumber, limit);
+
+    if (isNaN(pageNumber) || !Number.isInteger(pageNumber) || pageNumber < 1) {
+      return res.status(400).json({ success: false, message: "Invalid pageNumber", statusCode: 400 });
+    }
+    if (isNaN(limit) || !Number.isInteger(limit) || limit < 1) {
+      return res.status(400).json({ success: false, message: "Invalid limit", statusCode: 400 });
+    }
+
+    const data = await req.user.getGroups({ through: { userId: req.user.id }, limit: limit, offset:limit*(pageNumber-1), });
+    const totalGroups = await req.user.countGroups();
+
+    const processedGroupsCount = pageNumber * limit;
+    const hasMore = processedGroupsCount < totalGroups;
+
+    const paginatedData = {
+      data,
+      hasMore
+    }
+
+
+    res.status(200).json({ success: true, groups: paginatedData, statusCode: 200 });
   } catch (err) {
+    console.log("err",err);
     res.status(500).json({ success: false, message: err, statusCode: 500 });
   }
 };
