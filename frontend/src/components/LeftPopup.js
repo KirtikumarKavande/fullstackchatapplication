@@ -1,6 +1,6 @@
 import React from 'react'
 
-const LeftPanel = (props) => {
+const LeftPopup = (props) => {
   const {title,children}=props
   return (
     <div className="w-1/4 bg-[#FFFFFF] text-white p-4 absolute max-h-screen ">
@@ -16,4 +16,4 @@ const LeftPanel = (props) => {
   )
 }
 
-export default LeftPanel
+export default LeftPopup

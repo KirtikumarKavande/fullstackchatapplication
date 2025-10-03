@@ -17,14 +17,13 @@ import LeftPopup from "./LeftPopup";
 import CreateNewGroup from "./CreateNewGroup";
 import FriendList from "./FriendList";
 import ChatWindow from "./ChatWindow";
+import LeftPanel from "./LeftPanel";
 const ChatHome = () => {
   const messageRef = useRef();
   const groupNameRef = useRef();
   const navigate = useNavigate();
   const [messageData, setMessageData] = useState([]);
   const [knowName, setKnowName] = useState(null);
-  const [isShowModel, setIsShowModel] = useState(false);
-  const [isCreateNewGroup, setIsCreateNewGroup] = useState(false);
   const [user, setUser] = useState(null);
   const [addUserTOGroup, setAddUserTOGroup] = useState([]);
   const [showGroups, setShowGroups] = useState([]);
@@ -33,8 +32,6 @@ const ChatHome = () => {
   const [memberInPerticularGroup, setMemberInPerticularGroup] = useState([]);
   const [socketMsg, setSocketMsg] = useState();
   const [socket, setSocket] = useState(null);
-  const [isShowContacts, setIsShowContacts] = useState(false)
-  const [chatId, setChatId] = useState("")
 
   const handleChat = (e) => {
     e.preventDefault();
@@ -150,132 +147,18 @@ const ChatHome = () => {
   };
   console.log("message data", messageData);
 
-  function populateContacts(params) {
-    setIsCreateNewGroup(false);
-    setIsShowModel(false);
-
-    setIsShowContacts(true)
 
 
-  }
-  function createNewGroup() {
-    setIsCreateNewGroup(true);
-    setIsShowModel(false);
-
-  }
-
-
-  function handleLogout() {
-
-  }
-
-  const menuItemsMap = new Map([
-    ['contacts', populateContacts],
-    ['newGroup', createNewGroup],
-    ['logout', handleLogout]
-
-  ])
-  const handleMenuSelected = (key) => {
-    const handler = menuItemsMap.get(key)
-    if (handler && typeof handler === 'function') {
-      handler()
-    }
-  }
 
 
   return (
     <div className="bg-gray-200 font-sans ">
       <div className="flex h-screen">
         <div className="w-1/4 bg-[#FFFFFF] text-white p-4 ">
-          <div className="mb-4">
-            {/* <h2 className="text-xl font-semibold">Contacts</h2> */}
-            <div className="flex items-center mt-2">
-              {/* <img src="user-avatar.jpg" alt="User Avatar" className="w-10 h-10 rounded-full mr-2"/> */}
-              <div className="flex">
-                <p
-                  className="text-lg text-black"
-                  onClick={() => {
-                    setIsShowModel(true);
-                  }}
-                  onBlur={() => {
-                    setIsShowModel(false);
-                  }}
-                >
-                  <BsThreeDotsVertical />
-                </p>
-                <p className="text-black mx-5 font-extrabold">GROUP CHAT APP</p>
-              </div>
-            </div>
-          </div>
-          {isShowModel && (
-            <div className="w-60  p-2 shadow-md rounded-lg bg-[#E5E7EB] absolute space-y-3" onBlur={() => { console.log("hello"); }}>
-              {
-                chatMenuitems.map((options) => {
-                  return (
-                    <div
-                      className="text-gray-600 hover:bg-[#D9DBDF] w-full cursor-pointer"
-                      onClick={() => {
-                        handleMenuSelected(options.key)
-
-                      }}
-                    >
-                      {options.label}
-                    </div>
-                  )
-
-                })
-              }
-              <div
-                className="text-gray-500"
-                onClick={() => {
-                  setIsShowModel(false);
-                }}
-              >
-                <BiArrowBack />{" "}
-              </div>
-            </div>
-          )}
-
-          <hr className="text-red-500" />
-          <div>
-            {showGroups &&
-              showGroups.map((item) => {
-                return (
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => {
-                      if ("id" in item) {
-                        setChatId(item.id);
-                      }
-                    }}
-                  >
-                    <div className="flex items-center mt-2">
-                      <div className="w-10 h-10 rounded-full bg-blue-500 text-white  mr-6 pl-1 pt-1">
-                        {item.groupname.substring(0, 4)}
-                      </div>
-                      <div className="text-black ">{item?.groupname}</div>
-                    </div>
-                    <hr className="text-red-600 w-full  mt-3" />
-                  </div>
-                );
-              })}
-          </div>
+          <LeftPanel/>
         </div>
 
-        {isCreateNewGroup && (
-
-          <LeftPopup title={"Create a Group"}>
-            <CreateNewGroup setIsCreateNewGroup={setIsCreateNewGroup} />
-          </LeftPopup>
-        )}
-        {
-          isShowContacts && (
-            <LeftPopup title={"Chat with Friends"}>
-              <FriendList isPersonalChat={true} setIsCreateNewGroup={() => { }} />
-            </LeftPopup>
-          )
-        }
-
+    
         {isEditGroupInfo && (
           <div className="w-1/4 bg-[#FFFFFF] text-white p-4 absolute max-h-screen ">
             <div className="mb-4">
@@ -361,7 +244,7 @@ const ChatHome = () => {
         )}
 
 
-        <ChatWindow chatId={chatId} />
+        <ChatWindow  />
 
         {/* <div className="w-3/4 bg-[#EFEAE2] ">
           <div
