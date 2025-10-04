@@ -6,12 +6,15 @@ import { BiArrowBack } from 'react-icons/bi';
 import CreateNewGroup from './CreateNewGroup';
 import FriendList from './FriendList';
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useDispatch } from 'react-redux';
+import { setChatId } from '../store/redux/slices/SelectedEntry.slice';
 
 
 
 const LeftPanel = () => {
   const [isShowModel, setIsShowModel] = useState(false);
   const [isCreateNewGroup, setIsCreateNewGroup] = useState(false);
+  const dispatch= useDispatch()
 
   const [isShowContacts, setIsShowContacts] = useState(false)
   const sentinelRef = useRef(null);
@@ -116,14 +119,20 @@ const LeftPanel = () => {
   }
 
   // Generate initials for group names (e.g., "Development Team" => "DT")
-  function generateGroupInitials(groupName) {
-    if (!groupName) return "";
-    const words = groupName.trim().split(" ");
+  function generateNameInitials(name) {
+    if (!name) return "";
+    const words = name.trim().split(" ");
     let initials = "";
     for (let i = 0; i < words.length && i < 2; i++) {
       if (words[i][0]) initials += words[i][0];
     }
     return initials.toUpperCase();
+  }
+
+  function handleSelectedChat(id){
+    
+      dispatch(setChatId(id))
+
   }
   return (
     <div className='w-[100%]'>
@@ -178,21 +187,22 @@ const LeftPanel = () => {
         )}
 
         <hr className="text-red-500" />
-        <div>
+        <div >
 
           {
 
-            groups.length>0 && groups.map((group) => {
+            groups.length>0 && groups.map((item) => {
               return (
                 <div
                   className="cursor-pointer"
-                  key={group.id}
+                  key={item.id}
+                  onClick={()=>{handleSelectedChat(item.id)}}
                 >
                   <div className="flex items-center  mt-2">
                     <div className="w-10 h-10 rounded-full  bg-blue-500 text-white  mr-6 pl-1 pt-1">
-                      <div className='m-1' >{generateGroupInitials(group?.groupname)}</div>
+                      <div className='m-1' >{generateNameInitials(item?.groupname)}</div>
                     </div>
-                    <div className="text-black ">{group?.groupname}</div>
+                    <div className="text-black ">{item?.groupname}</div>
                   </div>
                   <hr className="text-red-600 w-full  mt-3" />
                 </div>
