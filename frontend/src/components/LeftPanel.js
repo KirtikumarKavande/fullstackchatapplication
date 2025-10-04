@@ -20,7 +20,7 @@ const LeftPanel = () => {
     console.log("pageparams", pageParam);
     const token = localStorage.getItem("token");
     const pageNumber = pageParam;
-    const limit = 3;
+    const limit = 10;
     const res = await fetch(
       `http://localhost:4000/getgroups?pageNumber=${pageNumber}&limit=${limit}`,
       {
@@ -39,6 +39,7 @@ const LeftPanel = () => {
     queryKey: ["groups"],
     queryFn: fetchGroups,
     initialPageParam: 1,
+    staleTime:300000,
     getNextPageParam: (lastPage, allPages) => {
       console.log("lastPage", lastPage.groups?.hasMore);
       console.log("allPages", allPages);
