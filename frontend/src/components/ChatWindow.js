@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { AiOutlineSend } from 'react-icons/ai'
 import { useSelector } from 'react-redux'
 
 const ChatWindow = () => {
     const messageRef = useRef()
     const chatId = useSelector((store) => store.selectedEntry.selectedChatId)
+    const messageContainerRef=useRef()
 
     async function fetchMessages() {
         if (!chatId) return
@@ -28,6 +29,11 @@ const ChatWindow = () => {
         queryFn: fetchMessages
     })
 
+    useEffect(()=>{
+        if(messageContainerRef && data){
+            messageContainerRef.current.scrollTop=messageContainerRef.current.scrollHeight
+        }
+    },[data])
     // if (error) return <div>something went wrong</div>
     // console.log(data)
 
@@ -49,12 +55,7 @@ const ChatWindow = () => {
                     </div>
                 </div>
             </div>
-            <div className="p-4 h-3/4 overflow-y-scroll ">
-
-
-
-
-
+            <div ref={messageContainerRef} className="p-4 h-3/4 overflow-y-scroll ">
                 <div>
 
                     {
