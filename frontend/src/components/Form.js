@@ -24,8 +24,9 @@ const Form = () => {
     );
     if (data.statusCode === 200) {
       console.log("sign in user ", data);
-      if (data?.data?.length  && "name" in data.data[0]) {
+      if (data?.data?.length && "name" in data.data[0]) {
         localStorage.setItem("name", data.data[0].name);
+        localStorage.setItem("userId", data.data[0].id);
 
       }
       toast.success(

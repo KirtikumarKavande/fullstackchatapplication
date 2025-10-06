@@ -3,35 +3,33 @@ const Message = require("../models/messsages");
 const User = require("../models/user");
 
 const saveMessage = async (req, res) => {
-  console.log('REQ.BODY',req.body)
+  console.log('REQ.BODY', req.body)
 
   try {
     const message = await req.user.createMessage({ ...req.body });
-     res.status(200).json({ success: true, sentMessage: message });
+    res.status(200).json({ success: true, sentMessage: message });
   } catch (err) {
     res.status(400).json({ success: false, message: err });
   }
 };
 
 
+
 const showMessage = async (req, res, next) => {
-  const users = await User.findAll();
-  const messages = await Message.findAll();
-  const array = [];
-  const messagesData = {};
-  messages.forEach((message) => {
-    users.forEach((user) => {
-      if (message.userId === user.id) {
-        array.push({
-          name: user.name,
-          message: message.message,
-          email: user.email,
-        });
-      }
+  const { chatId } = req.params;
+  const { id: userId } = req.user;
+
+  try {
+    const messages = await Message.findAll({
+      where: { groupId:chatId },
+      include: [{ model: User, as: 'user' }],
+      order: [['createdAt', 'ASC']],
     });
-  });
 
-  res.status(200).json(array);
+    res.status(200).json({ success: true, messages });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ success: false, message: err.message });
+  }
 };
-
 module.exports = { saveMessage, showMessage };

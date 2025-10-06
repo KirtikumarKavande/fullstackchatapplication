@@ -1,21 +1,36 @@
-import React, { useEffect, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import React, { useRef } from 'react'
 import { AiOutlineSend } from 'react-icons/ai'
+import { useSelector } from 'react-redux'
 
-const ChatWindow = (props) => {
-    const {chatId}=props
-    const messageRef=useRef()
+const ChatWindow = () => {
+    const messageRef = useRef()
+    const chatId = useSelector((store) => store.selectedEntry.selectedChatId)
 
-    useEffect(()=>{
+    async function fetchMessages() {
+        if (!chatId) return
+        console.log("good", chatId);
+        const token = localStorage.getItem("token");
+        const res = await fetch(`http://localhost:4000/showmessage/${chatId}}`,
+            {
+                headers: { Authorization: token },
+            }
+        )
+        console.log("res", res);
+        if (!res.ok) {
+            throw new Error("failed to fetch data")
 
-        
-
-
-    },[chatId])
-
-    function handleChat(e) {
-        e.preventDefault()
-             console.log("chatid",chatId,messageRef.current.value);
+        }
+        return res.json()
     }
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['messages', chatId],
+        queryFn: fetchMessages
+    })
+
+    // if (error) return <div>something went wrong</div>
+    // console.log(data)
+
     return (
 
         <div className="w-3/4 bg-[#EFEAE2] ">
@@ -41,28 +56,51 @@ const ChatWindow = (props) => {
 
 
                 <div>
-                    <div className="flex mb-4">
-                        <div
 
-                            className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2"
-                        >
-                            {/* {item?.user?.name.substring(0, 4)} */}
-                        </div>
-                        <div className="bg-blue-100 p-2 rounded-lg">
-                            <p className="text-blue-800">good</p>
-                        </div>
-                    </div>
-                    <div className="flex justify-end">
-                        <div className="bg-gray-200 p-2 rounded-lg">
-                            <p className="text-gray-600">bad</p>
-                        </div>
-                    </div>
+                    {
+                        data && data?.messages.map((msg) => {
+                            console.log(msg.user.id);
+                            return (
+                                <div>{
+                                    +msg.user.id !== +localStorage.getItem("userId") ? (
+
+                                        <div className="flex mb-4">
+                                            <div
+
+                                                className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center mr-2"
+                                            >
+                                                {/* {item?.user?.name.substring(0, 4)} */}
+                                            </div>
+                                            <div className="bg-blue-100 p-2 rounded-lg">
+                                                <p className="text-blue-800">{msg?.message}</p>
+                                            </div>
+                                        </div>
+
+
+
+
+                                    ) : (<div className="flex justify-end">
+                                        <div className="bg-gray-200 p-2 rounded-lg">
+                                            <p className="text-gray-600">{msg?.message}</p>
+                                        </div>
+                                    </div>)
+
+                                }
+
+
+
+                                </div>
+                            )
+
+                        })
+                    }
+
                 </div>
 
             </div>
             <form
                 className="p-4 border-t border-gray-300 relative bottom-3"
-            onSubmit={handleChat}
+            // onSubmit={handleChat}
             >
                 <div className="flex">
                     <input
