@@ -1,23 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { RxCross1 } from "react-icons/rx";
-import { io } from "socket.io-client";
 
 
 import ChatWindow from "./ChatWindow";
 import LeftPanel from "./LeftPanel";
-import { useDispatch } from "react-redux";
-import { setSocketObj } from "../store/redux/slices/socketConnection.slice";
 const ChatHome = () => {
   const [isEditGroupInfo, setIsEditGroupInfo] = useState(false);
-  const dispatch = useDispatch()
 
 
 
-  useEffect(() => {
- 
-
-  }, [dispatch]);
 
 
   return (
