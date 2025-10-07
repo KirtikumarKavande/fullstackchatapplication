@@ -130,8 +130,8 @@ const LeftPanel = () => {
   }
 
   function handleSelectedChat(id){
-    
       dispatch(setChatId(id))
+      
 
   }
   return (

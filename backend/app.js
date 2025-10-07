@@ -29,8 +29,11 @@ const subClient = pubClient.duplicate();
 
 const io = new Server(server, {
   cors: { origin: "http://localhost:3000" },
-  adapter:createAdapter(pubClient, subClient)
 });
+// const io = new Server(server, {
+//   cors: { origin: "http://localhost:3000" },
+//   adapter:createAdapter(pubClient, subClient)
+// });
 io.use((socket,next)=>{
 
   try {
@@ -48,7 +51,8 @@ io.use((socket,next)=>{
 })
 
 io.on("connection", (socket) => {
-  console.log("⚡ User connected:", socket.id);
+  console.log("User connected:", socket.id);
+
 
   socket.on("send-message", (data) => {
     socket.broadcast.emit("message", data);
