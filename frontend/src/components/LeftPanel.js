@@ -8,19 +8,20 @@ import FriendList from './FriendList';
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useDispatch } from 'react-redux';
 import { setChatId } from '../store/redux/slices/SelectedEntry.slice';
+import useSocketConnection from '../singleton/useSocketConnection';
 
 
 
 const LeftPanel = () => {
   const [isShowModel, setIsShowModel] = useState(false);
   const [isCreateNewGroup, setIsCreateNewGroup] = useState(false);
-  const dispatch= useDispatch()
+  const dispatch = useDispatch()
 
   const [isShowContacts, setIsShowContacts] = useState(false)
   const sentinelRef = useRef(null);
 
+  const socket = useSocketConnection()
   const fetchGroups = async ({ pageParam }) => {
-    console.log("pageparams", pageParam);
     const token = localStorage.getItem("token");
     const pageNumber = pageParam;
     const limit = 10;
@@ -42,7 +43,7 @@ const LeftPanel = () => {
     queryKey: ["groups"],
     queryFn: fetchGroups,
     initialPageParam: 1,
-    staleTime:300000,
+    staleTime: 300000,
     getNextPageParam: (lastPage, allPages) => {
       console.log("lastPage", lastPage.groups?.hasMore);
       console.log("allPages", allPages);
@@ -118,7 +119,6 @@ const LeftPanel = () => {
     }
   }
 
-  // Generate initials for group names (e.g., "Development Team" => "DT")
   function generateNameInitials(name) {
     if (!name) return "";
     const words = name.trim().split(" ");
@@ -129,9 +129,9 @@ const LeftPanel = () => {
     return initials.toUpperCase();
   }
 
-  function handleSelectedChat(id){
-      dispatch(setChatId(id))
-      
+  function handleSelectedChat(id) {
+    dispatch(setChatId(id))
+    socket.emit('connect-group', id)
 
   }
   return (
@@ -191,12 +191,12 @@ const LeftPanel = () => {
 
           {
 
-            groups.length>0 && groups.map((item) => {
+            groups.length > 0 && groups.map((item) => {
               return (
                 <div
                   className="cursor-pointer"
                   key={item.id}
-                  onClick={()=>{handleSelectedChat(item.id)}}
+                  onClick={() => { handleSelectedChat(item.id) }}
                 >
                   <div className="flex items-center  mt-2">
                     <div className="w-10 h-10 rounded-full  bg-blue-500 text-white  mr-6 pl-1 pt-1">

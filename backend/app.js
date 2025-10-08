@@ -51,12 +51,13 @@ io.use((socket,next)=>{
 })
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-
-  socket.on("send-message", (data) => {
-    socket.broadcast.emit("message", data);
+  socket.on("connect-group", (groupId) => {
+    socket.join(groupId)
   });
+
+  socket.on('send-message',(chat)=>{
+    socket.to(chat.chatId).emit('receive-message',chat.message)
+  })
 
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);

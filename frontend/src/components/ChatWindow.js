@@ -2,11 +2,14 @@ import { useQuery } from '@tanstack/react-query'
 import React, { useEffect, useRef } from 'react'
 import { AiOutlineSend } from 'react-icons/ai'
 import { useSelector } from 'react-redux'
+import useSocketConnection from '../singleton/useSocketConnection'
 
 const ChatWindow = () => {
     const messageRef = useRef()
     const chatId = useSelector((store) => store.selectedEntry.selectedChatId)
     const messageContainerRef=useRef()
+    const socket=useSocketConnection()
+
 
     async function fetchMessages() {
         if (!chatId) return
@@ -34,8 +37,9 @@ const ChatWindow = () => {
             messageContainerRef.current.scrollTop=messageContainerRef.current.scrollHeight
         }
     },[data])
-    // if (error) return <div>something went wrong</div>
-    // console.log(data)
+   function sendMessage(){
+    socket.emit('send-message',{chatId,message:messageRef.current.value})
+   }
 
     return (
 
@@ -99,7 +103,7 @@ const ChatWindow = () => {
                 </div>
 
             </div>
-            <form
+            <div
                 className="p-4 border-t border-gray-300 relative bottom-3"
             // onSubmit={handleChat}
             >
@@ -110,11 +114,11 @@ const ChatWindow = () => {
                         placeholder="Type a message..."
                         className="flex-1 border rounded-full py-2 px-4 focus:outline-none focus:border-blue-500"
                     />
-                    <button className="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center ml-2">
+                    <button onClick={sendMessage} className="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center ml-2">
                         <AiOutlineSend />
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
     )
 }
