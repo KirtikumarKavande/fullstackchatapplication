@@ -5,7 +5,6 @@ let socketInstance = null;
 
 const useSocketConnection = () => {
     const [socket, setSocket] = useState(socketInstance);
-
     useEffect(() => {
         if (!socketInstance) {
             const token = localStorage.getItem("token");

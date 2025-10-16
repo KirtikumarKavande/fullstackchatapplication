@@ -1,21 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { AiOutlineSend } from 'react-icons/ai'
 import { useSelector } from 'react-redux'
-import useSocketConnection from '../singleton/useSocketConnection'
+import useSocketConnection, { disconnectSocket } from '../singleton/useSocketConnection'
 
 const ChatWindow = () => {
     const messageRef = useRef()
     const chatId = useSelector((store) => store.selectedEntry.selectedChatId)
-    const messageContainerRef=useRef()
-    const socket=useSocketConnection()
+    const messageContainerRef = useRef()
+    const socket = useSocketConnection()
+    const [messages, setMessages] = useState([])
+    console.log("messages", messages);
 
 
     async function fetchMessages() {
         if (!chatId) return
         console.log("good", chatId);
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:4000/showmessage/${chatId}}`,
+        const res = await fetch(`http://localhost:4000/showmessage/${chatId}`,
             {
                 headers: { Authorization: token },
             }
@@ -27,19 +29,46 @@ const ChatWindow = () => {
         }
         return res.json()
     }
-    const { data, isLoading, error } = useQuery({
+    let { data, isLoading, error } = useQuery({
         queryKey: ['messages', chatId],
-        queryFn: fetchMessages
+        queryFn: fetchMessages,
+        enabled: !!chatId
     })
 
-    useEffect(()=>{
-        if(messageContainerRef && data){
-            messageContainerRef.current.scrollTop=messageContainerRef.current.scrollHeight
+    useEffect(() => {
+        // Cleanup when entire app unmounts
+        return () => {
+            disconnectSocket();
+        };
+    }, []);
+
+
+    useEffect(() => {
+        if (data) {
+            setMessages(data.messages)
         }
-    },[data])
-   function sendMessage(){
-    socket.emit('send-message',{chatId,message:messageRef.current.value})
-   }
+    }, [data])
+    useEffect(() => {
+        socket && socket.on('receive-message', (msg) => {
+            console.log("incoming msg", msg);
+            setMessages((prev) => [...prev, msg])
+        })
+
+        // todo: add cleanup logic
+        // return () => {
+        //     disconnectSocket()
+        // }
+    }, [socket])
+
+    useEffect(() => {
+        if (messageContainerRef.current) {
+            messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+        }
+    }, [messages])
+    function sendMessage() {
+        const msg = { chatId, id: Math.random(10) * 10, message: messageRef.current.value, user: { id: +localStorage.getItem("userId",) } }
+        socket.emit('send-message', msg)
+    }
 
     return (
 
@@ -63,8 +92,8 @@ const ChatWindow = () => {
                 <div>
 
                     {
-                        data && data?.messages.map((msg) => {
-                            console.log(msg.user.id);
+                        messages.length > 0 && messages?.map((msg) => {
+                            // console.log(msg.user.id);
                             return (
                                 <div>{
                                     +msg.user.id !== +localStorage.getItem("userId") ? (
@@ -80,10 +109,6 @@ const ChatWindow = () => {
                                                 <p className="text-blue-800">{msg?.message}</p>
                                             </div>
                                         </div>
-
-
-
-
                                     ) : (<div className="flex justify-end">
                                         <div className="bg-gray-200 p-2 rounded-lg">
                                             <p className="text-gray-600">{msg?.message}</p>
@@ -91,9 +116,6 @@ const ChatWindow = () => {
                                     </div>)
 
                                 }
-
-
-
                                 </div>
                             )
 

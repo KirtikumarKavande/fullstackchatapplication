@@ -18,13 +18,13 @@ const usergroupMapper = require("./models/usergroupmapper");
 const jwt = require("jsonwebtoken");
 
 const app = express();
-const server = http.createServer(app); // ✅ create HTTP server
+const server = http.createServer(app);
 
-const { createAdapter } =require ("@socket.io/redis-adapter");
-const { Redis }= require ("ioredis");
+// const { createAdapter } = require("@socket.io/redis-adapter");
+// const { Redis } = require("ioredis");
 
-const pubClient = new Redis();
-const subClient = pubClient.duplicate();
+// const pubClient = new Redis();
+// const subClient = pubClient.duplicate();
 
 
 const io = new Server(server, {
@@ -34,29 +34,33 @@ const io = new Server(server, {
 //   cors: { origin: "http://localhost:3000" },
 //   adapter:createAdapter(pubClient, subClient)
 // });
-io.use((socket,next)=>{
+io.use((socket, next) => {
 
   try {
-   const {token} =socket.handshake.auth
-  const user = jwt.verify(token, "98kirtikmarseqnjde132323123232kjcdbcf");
+    const { token } = socket.handshake.auth
+    console.log("token", token)
 
-   console.log("user data",user)
+    const user = jwt.verify(token, "98kirtikmarseqnjde132323123232kjcdbcf");
 
-
-  next()
-
+    // TODO: bug:user is getting logged even frontend doesn't sends requests
+    console.log("user data", user)
+    next()
   } catch (error) {
     console.log(error);
   }
 })
 
 io.on("connection", (socket) => {
+  console.log("hello",socket.id);
   socket.on("connect-group", (groupId) => {
+    console.log("groupIdkk",groupId)
+
     socket.join(groupId)
   });
 
-  socket.on('send-message',(chat)=>{
-    socket.to(chat.chatId).emit('receive-message',chat.message)
+  socket.on('send-message', (chat) => {
+    console.log("lets see",chat)
+    socket.to(chat.chatId).emit('receive-message', chat)
   })
 
   socket.on("disconnect", () => {
