@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  backend-1:
+    build: ./backend
+    environment:
+      - INSTANCE_NAME=backend-1
+      - PORT=4000
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
