@@ -20,56 +20,123 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const server = http.createServer(app);
 
-// const { createAdapter } = require("@socket.io/redis-adapter");
-// const { Redis } = require("ioredis");
+const { createAdapter } = require("@socket.io/redis-adapter");
+const { Redis } = require("ioredis");
 
-// const pubClient = new Redis();
-// const subClient = pubClient.duplicate();
+// Server identification for testing
+const SERVER_ID = process.env.SERVER_ID || `Server-${Math.random().toString(36).substr(2, 9)}`;
+console.log(`🔷 Starting ${SERVER_ID}`);
 
+// Redis configuration with proper error handling and connection options
+const redisConfig = {
+  host: process.env.REDIS_HOST || 'redis',
+  port: process.env.REDIS_PORT || 6379,
+  lazyConnect: true, // Don't connect immediately - wait for error handlers first
+  retryStrategy: (times) => {
+    const delay = Math.min(times * 50, 2000);
+    console.log(`[${SERVER_ID}] Redis retry attempt ${times}, waiting ${delay}ms`);
+    return delay;
+  },
+  maxRetriesPerRequest: null, // Important for pub/sub
+};
 
-const io = new Server(server, {
-  cors: { origin: "http://localhost:3000" },
+const pubClient = new Redis(redisConfig);
+const subClient = pubClient.duplicate();
+
+// CRITICAL: Attach error handlers BEFORE connecting
+pubClient.on('error', (err) => {
+  console.error(`[${SERVER_ID}] Redis pubClient Error:`, err.message);
 });
-// const io = new Server(server, {
-//   cors: { origin: "http://localhost:3000" },
-//   adapter:createAdapter(pubClient, subClient)
-// });
+
+subClient.on('error', (err) => {
+  console.error(`[${SERVER_ID}] Redis subClient Error:`, err.message);
+});
+
+pubClient.on('connect', () => {
+  console.log(`[${SERVER_ID}] ✅ Redis pubClient connected`);
+});
+
+subClient.on('connect', () => {
+  console.log(`[${SERVER_ID}] ✅ Redis subClient connected`);
+});
+
+pubClient.on('ready', () => {
+  console.log(`[${SERVER_ID}] ✅ Redis pubClient ready`);
+});
+
+subClient.on('ready', () => {
+  console.log(`[${SERVER_ID}] ✅ Redis subClient ready`);
+});
+
+// Now connect after error handlers are in place
+pubClient.connect().catch((err) => {
+  console.error(`[${SERVER_ID}] Failed to connect pubClient:`, err);
+});
+
+subClient.connect().catch((err) => {
+  console.error(`[${SERVER_ID}] Failed to connect subClient:`, err);
+});
+
+// Socket.IO server with CORS for multiple frontends
+const io = new Server(server, {
+  cors: { 
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001", 
+      "http://localhost:3002", 
+      "http://localhost:3003"
+    ],
+    credentials: true
+  },
+  adapter: createAdapter(pubClient, subClient)
+});
 io.use((socket, next) => {
 
   try {
     const { token } = socket.handshake.auth
-    console.log("token", token)
+    console.log(`[${SERVER_ID}] token`, token)
 
     const user = jwt.verify(token, "98kirtikmarseqnjde132323123232kjcdbcf");
 
     // TODO: bug:user is getting logged even frontend doesn't sends requests
-    console.log("user data", user)
+    console.log(`[${SERVER_ID}] user data`, user)
     next()
   } catch (error) {
-    console.log(error);
+    console.log(`[${SERVER_ID}] Error:`, error);
   }
 })
 
 io.on("connection", (socket) => {
-  console.log("hello",socket.id);
+  console.log(`[${SERVER_ID}] ✅ User connected:`, socket.id);
   socket.on("connect-group", (groupId) => {
-    console.log("groupIdkk",groupId)
+    console.log(`[${SERVER_ID}] 📁 User ${socket.id} joined group:`, groupId)
 
     socket.join(groupId)
   });
 
   socket.on('send-message', (chat) => {
-    console.log("lets see",chat)
+    console.log(`[${SERVER_ID}] 💬 Message from ${socket.id}:`, chat)
     socket.to(chat.chatId).emit('receive-message', chat)
   })
 
   socket.on("disconnect", () => {
-    console.log("❌ User disconnected:", socket.id);
+    console.log(`[${SERVER_ID}] ❌ User disconnected:`, socket.id);
   });
+  
+  // Emit server info to help identify which backend the client is connected to
+  socket.emit('server-info', { serverId: SERVER_ID });
 });
 
-// Middlewares
-app.use(cors({ origin: "http://localhost:3000" }));
+// Middlewares - CORS for multiple frontends
+app.use(cors({ 
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001", 
+    "http://localhost:3002", 
+    "http://localhost:3003"
+  ],
+  credentials: true
+}));
 app.use(bodyParser.json({ extended: false }));
 
 // Routes
@@ -93,9 +160,9 @@ sequelize
   .sync()
   .then(() => {
     server.listen(PORT, () => {
-      console.log("🚀 Server started on PORT " + PORT);
+      console.log(`🚀 ${SERVER_ID} started on PORT ${PORT}`);
     });
   })
   .catch((err) => {
-    console.log(err);
+    console.log(`[${SERVER_ID}] Error:`, err);
   });

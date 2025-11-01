@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { AiOutlineSend } from 'react-icons/ai'
 import { useSelector } from 'react-redux'
 import useSocketConnection, { disconnectSocket } from '../singleton/useSocketConnection'
+import { BASE_URL } from '../utilites/constant'
 
 const ChatWindow = () => {
     const messageRef = useRef()
@@ -17,7 +18,7 @@ const ChatWindow = () => {
         if (!chatId) return
         console.log("good", chatId);
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:4000/showmessage/${chatId}`,
+        const res = await fetch(`${BASE_URL}/showmessage/${chatId}`,
             {
                 headers: { Authorization: token },
             }
@@ -54,7 +55,9 @@ const ChatWindow = () => {
             setMessages((prev) => [...prev, msg])
         })
 
-        // todo: add cleanup logic
+        // todo: add cleanup logic 
+        // todo: socket connection fails browser keeps on retries and finally it freezes
+        // todo:no proper error handling if bE request fails entire message crashes
         // return () => {
         //     disconnectSocket()
         // }

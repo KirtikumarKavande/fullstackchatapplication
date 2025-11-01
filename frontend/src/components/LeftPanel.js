@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import { chatMenuitems } from '../utilites/constant';
+import { BASE_URL, chatMenuitems } from '../utilites/constant';
 import LeftPopup from "./LeftPopup";
 import { BiArrowBack } from 'react-icons/bi';
 import CreateNewGroup from './CreateNewGroup';
@@ -26,7 +26,7 @@ const LeftPanel = () => {
     const pageNumber = pageParam;
     const limit = 10;
     const res = await fetch(
-      `http://localhost:4000/getgroups?pageNumber=${pageNumber}&limit=${limit}`,
+      `${BASE_URL}/getgroups?pageNumber=${pageNumber}&limit=${limit}`,
       {
         headers: { Authorization: token },
       }

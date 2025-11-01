@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { BASE_URL } from '../utilites/constant';
 
 let socketInstance = null;
 
@@ -9,7 +10,7 @@ const useSocketConnection = () => {
         if (!socketInstance) {
             const token = localStorage.getItem("token");
 
-            socketInstance = io("http://localhost:4000", {
+            socketInstance = io(`${BASE_URL}`, {
                 auth: { token },
             });
 

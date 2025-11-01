@@ -1,15 +1,101 @@
-version: '3.8'
-
 services:
+  # Redis for all backends to share
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - chat-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Backend 1 on port 4001
   backend-1:
     build: ./backend
+    ports:
+      - "4001:4000"
     environment:
-      - INSTANCE_NAME=backend-1
       - PORT=4000
-    ports:
-      - "4000:4000"
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - chat-network
 
-  frontend:
-    build: ./frontend
+  # Backend 2 on port 4002
+  backend-2:
+    build: ./backend
     ports:
-      - "3000:3000"
+      - "4002:4000"
+    environment:
+      - PORT=4000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - chat-network
+
+  # Backend 3 on port 4003
+  backend-3:
+    build: ./backend
+    ports:
+      - "4003:4000"
+    environment:
+      - PORT=4000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - chat-network
+
+  # Frontend 1 connecting to backend 1 (port 3001)
+  frontend-1:
+    build:
+      context: ./frontend
+      args:
+        - REACT_APP_BACKEND_URL=http://localhost:4001
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend-1
+    networks:
+      - chat-network
+
+  # Frontend 2 connecting to backend 2 (port 3002)
+  frontend-2:
+    build:
+      context: ./frontend
+      args:
+        - REACT_APP_BACKEND_URL=http://localhost:4002
+    ports:
+      - "3002:3000"
+    depends_on:
+      - backend-2
+    networks:
+      - chat-network
+
+  # # Frontend 3 connecting to backend 3 (port 3003)
+  # frontend-3:
+  #   build:
+  #     context: ./frontend
+  #     args:
+  #       - REACT_APP_BACKEND_URL=http://localhost:4003
+  #   ports:
+  #     - "3003:3000"
+  #   depends_on:
+  #     - backend-3
+  #   networks:
+  #     - chat-network
+
+networks:
+  chat-network:
+    driver: bridge
